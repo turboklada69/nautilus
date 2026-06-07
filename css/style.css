@@ -123,8 +123,10 @@ img{max-width:100%;display:block;}
 .nav-logo{
   display:flex;
   align-items:center;
+  height:100%;
   gap:10px;
   text-decoration:none;
+  line-height:0;
 }
 .nav-logo-badge{
   background:var(--yellow);
