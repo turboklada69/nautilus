@@ -188,6 +188,13 @@
         </p>
 
         <form id="contactForm" novalidate>
+          <!-- Web3Forms klíč – nahraďte YOUR_ACCESS_KEY vaším klíčem z web3forms.com -->
+          <input type="hidden" name="access_key" value="380d1826-bb9d-4fb1-9851-2e3b1eca5ece">
+          <input type="hidden" name="subject" value="Nová zpráva z webu Fitness Nautilus">
+          <input type="hidden" name="from_name" value="Fitness Nautilus web">
+          <!-- Honeypot ochrana proti spamu -->
+          <input type="checkbox" name="botcheck" style="display:none">
+
           <div class="grid-2" style="gap:16px;">
             <div class="form-group">
               <label class="form-label" for="name">Jméno a příjmení *</label>
@@ -205,8 +212,8 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="subject">Téma zprávy</label>
-            <select class="form-select" id="subject" name="subject">
+            <label class="form-label" for="topic">Téma zprávy</label>
+            <select class="form-select" id="topic" name="topic">
               <option value="">– Vyberte téma –</option>
               <option>Informace o členství</option>
               <option>Permanentka FLEX</option>
@@ -228,14 +235,67 @@
             </label>
           </div>
 
-          <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:16px 32px;font-size:1rem;">
+          <button type="submit" id="submitBtn" class="btn btn-primary" style="width:100%;justify-content:center;padding:16px 32px;font-size:1rem;">
             Odeslat zprávu
           </button>
+
+          <!-- Stavy po odeslání -->
+          <div id="formSuccess" style="display:none;margin-top:20px;padding:16px 20px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);border-radius:8px;color:#22c55e;text-align:center;font-weight:600;">
+            ✓ Zpráva odeslána! Ozveme se co nejdříve.
+          </div>
+          <div id="formError" style="display:none;margin-top:20px;padding:16px 20px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);border-radius:8px;color:#ef4444;text-align:center;font-weight:600;">
+            ✗ Něco se pokazilo. Zkuste to znovu nebo zavolejte.
+          </div>
 
           <p style="font-size:.8rem;color:var(--muted);text-align:center;margin-top:12px;">
             Nebo zavolejte přímo: <a href="tel:+420777822881" style="color:var(--yellow);">777 822 881</a>
           </p>
         </form>
+
+        <script>
+          document.getElementById('contactForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const successEl = document.getElementById('formSuccess');
+            const errorEl = document.getElementById('formError');
+
+            // Validace
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const message = document.getElementById('message').value.trim();
+            if (!name || !email || !message) {
+              errorEl.textContent = '✗ Vyplňte prosím povinná pole (jméno, e-mail, zpráva).';
+              errorEl.style.display = 'block';
+              return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Odesílám...';
+            successEl.style.display = 'none';
+            errorEl.style.display = 'none';
+
+            try {
+              const data = new FormData(this);
+              const res = await fetch('https://api.web3forms.com/submit', {
+                method: 'POST',
+                body: data
+              });
+              const json = await res.json();
+              if (json.success) {
+                successEl.style.display = 'block';
+                this.reset();
+              } else {
+                throw new Error(json.message);
+              }
+            } catch (err) {
+              errorEl.textContent = '✗ Něco se pokazilo. Zkuste to znovu nebo zavolejte.';
+              errorEl.style.display = 'block';
+            } finally {
+              btn.disabled = false;
+              btn.textContent = 'Odeslat zprávu';
+            }
+          });
+        </script>
       </div>
 
     </div>
